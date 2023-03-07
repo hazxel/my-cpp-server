@@ -5,7 +5,7 @@ TARGET = client server
 all: $(TARGET)
 
 $(TARGET): %: %.cpp
-	$(CC) -o $@ $@.cpp
+	$(CC) -M -o $@ $<
 
 .PHONY: clean
 

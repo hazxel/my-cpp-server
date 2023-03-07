@@ -1,8 +1,6 @@
-#include <iostream>
+#ifndef MY_SERVER_ERROR
+#define MY_SERVER_ERROR
 
-void errif(bool condition, const char *errmsg){
-    if(condition){
-      	std::cerr << errmsg << std::endl;
-        exit(EXIT_FAILURE);
-    }
-}
+void errif(bool, const char*);
+
+#endif

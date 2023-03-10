@@ -13,15 +13,12 @@ TARGET_OBJ_FILES = $(patsubst %, %.o, $(TARGET))
 SUPPORT_SRC_FILES = $(filter-out $(TARGET_SRC_FILES), $(CPP_SRC_FILES))
 SUPPORT_OBJ_FILES = $(filter-out $(TARGET_OBJ_FILES), $(CPP_OBJ_FILES))
 
-# INC_DIRS = $(shell find $(SOURCE_DIR) -type d)
-# INC_FLAGS = $(addprefix -I,$(INC_DIRS))
-
 CC = g++
 CC_FLAGS = -std=c++17
 LDFLAGS =
 
 
-all: $(TARGET) # $(addprefix $(BUILD_DIR)/, $(TARGET))
+all: $(TARGET) 
 
 $(TARGET): %: %.o $(SUPPORT_OBJ_FILES)
 	$(CC) $(addprefix $(BUILD_DIR)/, $(SUPPORT_OBJ_FILES)) $(BUILD_DIR)/$< -o $(BINARY_DIR)/$@ $(LDFLAGS)
@@ -38,14 +35,6 @@ $(TARGET): %: %.o $(SUPPORT_OBJ_FILES)
 	rm -f $@.$$$$.dtmp
 
 -include $(CPP_DPT_FILES)
-
-help:
-	@echo $(TARGET_SRC_FILES)
-	@echo $(TARGET_OBJ_FILES)
-	@echo $(addprefix $(BUILD_DIR)/, $(TARGET))
-	@echo $(shell basename $(CPP_SRC_FILES))
-	@echo $(CPP_OBJ_FILES)
-	@echo $(SUPPORT_OBJ_FILES)
 
 .PHONY: clean
 clean:

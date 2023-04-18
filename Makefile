@@ -19,9 +19,9 @@ LDFLAGS =
 
 all: $(TARGET) 
 
-$(TARGET): %:$(filter %, $(TARGET_OBJ_FILES)) $(SUPPORT_OBJ_FILES)
-	mkdir -p $(BINARY_DIR) 
-	$(CC) $(SUPPORT_OBJ_FILES) $< -o $(BINARY_DIR)/$@ $(LDFLAGS)
+$(TARGET): %:$(BUILD_DIR)/%.o $(SUPPORT_OBJ_FILES)
+	mkdir -p $(BINARY_DIR)
+	$(CC) $^ -o $(BINARY_DIR)/$@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp
 	mkdir -p $(dir $@)

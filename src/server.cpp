@@ -1,4 +1,5 @@
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <arpa/inet.h>
 #include <cstring>
 #include <iostream>
@@ -20,17 +21,18 @@ int main() {
     serv_addr.sin_port = htons(8888);
 
     errif(bind(sockfd, (sockaddr*) &serv_addr, sizeof(serv_addr)), "socket bind error");
-
     std::cout << "Server socket created! fd: " << sockfd << ", IP: " << inet_ntoa(serv_addr.sin_addr) << ", Port: " << ntohs(serv_addr.sin_port) << std::endl;
 
     errif(listen(sockfd, SOMAXCONN), "socket listen error");
+    std::cout << "Server socket listening..." << std::endl;
+
+    int epfd = epoll_create(0);
 
     struct sockaddr_in clnt_addr;
     memset(&clnt_addr, 0, sizeof(clnt_addr));
     socklen_t clnt_addr_len = sizeof(clnt_addr);
     int clnt_sockfd = accept(sockfd, (sockaddr*)&clnt_addr, &clnt_addr_len);
     errif(clnt_sockfd == -1, "socket accept error");
-    
     std::cout << "Accepted a new client! fd: " << clnt_sockfd << ", IP: " << inet_ntoa(clnt_addr.sin_addr) << ", Port: " << ntohs(clnt_addr.sin_port) << std::endl;
 
     while (true) {

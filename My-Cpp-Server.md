@@ -140,9 +140,18 @@ epoll模型修改主动轮询为被动通知，当有事件发生时，被动接
 
 ##### usage
 
-- `epoll_create`: 创建一个epoll文件描述符并返回，失败则返回-1
+- `epoll_create`: opens an eventpoll file descriptor, return -1 on failure
+
+  ```c++
+  int epfd = epoll_create(1024);  // 参数表示监听事件的大小，如超过内核会自动调整，已经被舍弃，无实际意义，传入一个大于0的数即可
+  int epfd = epoll_create1(0);    //参数是一个flag，一般设为0，详细参考man epoll
+  ```
+
 - `epoll_ctl`: tell the kernel file descriptors you’re interested in updates about. Interestingly, you can give it lots of different kinds of file descriptors (pipes, FIFOs, sockets, POSIX message queues, inotify instances, devices, & more), but **NOT regular files**. 
+
 - `epoll_wait`: wait for updates about the list of files you’re interested in.
+
+
 
 ### Error Handling
 

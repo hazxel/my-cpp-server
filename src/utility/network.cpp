@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <cstring>
 
 #include "error.hpp"
 #include "network.hpp"
@@ -10,4 +11,11 @@ void set_nonblock(int fd){
     flags |= O_NONBLOCK;
     int ret = fcntl(fd, F_SETFL, flags);
     errif(ret == -1, "fcntl set flags error");
+}
+
+void construct_sockaddr_in(struct sockaddr_in& addr, const char* ip, int port) {
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr(ip);
+    addr.sin_port = htons(port);
 }

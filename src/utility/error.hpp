@@ -1,5 +1,5 @@
-#ifndef MY_SERVER_ERROR
-#define MY_SERVER_ERROR
+#ifndef MY_SERVER_ERROR_HPP
+#define MY_SERVER_ERROR_HPP
 
 void errif(bool, const char*);
 

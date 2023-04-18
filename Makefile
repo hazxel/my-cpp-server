@@ -1,15 +1,18 @@
-BUILD_DIR = build
+BLD_DIR = build
 DPT_DIR = build/.dpt
-BINARY_DIR = bin
-SOURCE_DIR = src
+BIN_DIR = bin
+DBG_DIR = dbg
+SRC_DIR = src
 
-CPP_SRC_FILES = $(shell find $(SOURCE_DIR) -name "*.cpp")
-CPP_OBJ_FILES = $(patsubst $(SOURCE_DIR)%, $(BUILD_DIR)%, $(patsubst %.cpp, %.o, $(CPP_SRC_FILES)))
-CPP_DPT_FILES = $(patsubst $(SOURCE_DIR)%, $(DPT_DIR)%, $(patsubst %.cpp, %.d, $(CPP_SRC_FILES)))
+CPP_SRC_FILES = $(shell find $(SRC_DIR) -name "*.cpp")
+CPP_OBJ_FILES = $(patsubst $(SRC_DIR)%, $(BLD_DIR)%, $(patsubst %.cpp, %.o, $(CPP_SRC_FILES)))
+CPP_DPT_FILES = $(patsubst $(SRC_DIR)%, $(DPT_DIR)%, $(patsubst %.cpp, %.d, $(CPP_SRC_FILES)))
 
 # put targets at the root of folder src!
-TARGET = client server
-TARGET_OBJ_FILES = $(patsubst %, $(BUILD_DIR)/%.o, $(TARGET))
+TARGETS = client server
+TARGET_BIN_FILES = $(addprefix $(BIN_DIR)/, $(TARGETS))
+TARGET_DBG_FILES = $(addprefix $(DBG_DIR)/, $(TARGETS))
+TARGET_OBJ_FILES = $(patsubst %, $(BLD_DIR)/%.o, $(TARGETS))
 SUPPORT_OBJ_FILES = $(filter-out $(TARGET_OBJ_FILES), $(CPP_OBJ_FILES))
 
 CC = clang++
@@ -17,27 +20,35 @@ CC_FLAGS = -std=c++17
 LDFLAGS =
 
 
-all: $(TARGET) 
+all: $(TARGET_BIN_FILES)
 
-$(TARGET): %:$(BUILD_DIR)/%.o $(SUPPORT_OBJ_FILES)
-	mkdir -p $(BINARY_DIR)
-	$(CC) $^ -o $(BINARY_DIR)/$@ $(LDFLAGS)
+debug: CC_FLAGS += -glldb
+debug: $(TARGET_DBG_FILES)
 
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp
+$(BIN_DIR)/%: $(BLD_DIR)/%.o $(SUPPORT_OBJ_FILES)
+	mkdir -p $(BIN_DIR)
+	$(CC) $^ -o $@ $(LDFLAGS)
+
+$(DBG_DIR)/%: $(BLD_DIR)/%.o $(SUPPORT_OBJ_FILES)
+	mkdir -p $(DBG_DIR)
+	$(CC) $^ -o $@ $(LDFLAGS)
+
+$(BLD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	mkdir -p $(dir $@)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-$(DPT_DIR)/%.d: $(SOURCE_DIR)/%.cpp 
+$(DPT_DIR)/%.d: $(SRC_DIR)/%.cpp 
 	mkdir -p $(dir $@); \
 	set -e; \
 	rm -f $@; \
 	$(CC) -MM $(CC_FLAGS) $< > $@.$$$$.dtmp; \
-	sed 's,\($(notdir $*)\)\.o[ :]*,$(patsubst $(DPT_DIR)%.d,$(BUILD_DIR)%.o,$@) $@ : ,g' < $@.$$$$.dtmp > $@; \
+	sed 's,\($(notdir $*)\)\.o[ :]*,$(patsubst $(DPT_DIR)%.d,$(BLD_DIR)%.o,$@) $@ : ,g' < $@.$$$$.dtmp > $@; \
 	rm -f $@.$$$$.dtmp
 
 -include $(CPP_DPT_FILES)
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR)
-	rm -rf $(BINARY_DIR)
+	rm -rf $(BLD_DIR)
+	rm -rf $(BIN_DIR)
+	rm -rf $(DBG_DIR)

@@ -113,6 +113,17 @@ Upon successful completion, returns the nonnegative file descriptor of the accep
 
 
 
+##### read/write
+
+> `read`/`write` are for TCP, for UDP, use `sendto`/`recvfrom`
+
+> Linux系统的文件描述符理论上是有限的，在使用完一个fd之后，需要使用头文件`<unistd.h>`中的`close`函数关闭。更多内核相关知识可以参考Robert Love《Linux内核设计与实现》的第三版。
+
+
+
+
+
+
 
 ### Error Handling
 

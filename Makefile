@@ -15,7 +15,7 @@ TARGET_DBG_FILES = $(addprefix $(DBG_DIR)/, $(TARGETS))
 TARGET_OBJ_FILES = $(patsubst %, $(BLD_DIR)/%.o, $(TARGETS))
 SUPPORT_OBJ_FILES = $(filter-out $(TARGET_OBJ_FILES), $(CPP_OBJ_FILES))
 
-CC = clang++
+CC = g++
 CC_FLAGS = -std=c++17
 LDFLAGS =
 

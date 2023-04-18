@@ -1,4 +1,5 @@
 #include <iostream>
+#include "error.hpp"
 
 void errif(bool condition, const char *errmsg){
     if(condition){

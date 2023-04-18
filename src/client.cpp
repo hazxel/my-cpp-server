@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "utility/error.hpp"
+#include "utility/network.hpp"
 
 #define BUFFER_SIZE 1024
 

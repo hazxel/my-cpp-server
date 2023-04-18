@@ -3,7 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "error.hpp"
+#include "utility/error.hpp"
 
 #define BUFFER_SIZE 1024
 

@@ -121,9 +121,28 @@ Upon successful completion, returns the nonnegative file descriptor of the accep
 
 
 
+### epoll
+
+##### select & poll
+
+`select` and `poll` are available on every Unix system, but `epoll` is Linux specific.  `poll` 基于轮询机制，效率较低： 仅知道有I/O事件发生，却不知哪几个流，只会无差异轮询所有流，找出能读/写数据的流进行操作。同时处理的流越多，无差别轮询时间越长 - O(n)。`poll` 和 `select` 类似，只是描述fd集合的方式不同，使用 `pollfd` 结构而非 `fd_set` 结构。
+
+##### epoll
+
+epoll模型修改主动轮询为被动通知，当有事件发生时，被动接收通知。所以epoll模型注册套接字后，主程序可做其他事情，当事件发生时，接收到通知后再去处理。
+
+##### trigger mode
+
+- level-triggered (LT): keep nagging you as long as the interested file descriptors are ready. Every event is guaranteed to be handled, but will have a side effect on performance.
 
 
+- edge-triggered (ET): get notifications **once** a file descriptor becomes readable. Will be more concurrency friendly, but will be more difficult to program. 注意ET模式必须搭配非阻塞式socket使用，触发可读事件以后，一定要一次性把 socket 上的数据收取干净才行，也就是说一定要循环调用 recv 函数直到 recv 出错，错误码是EWOULDBLOCK（EAGAIN 一样）（此时表示 socket 上本次数据已经读完），所以接受连接最好不要用ET模式
 
+##### usage
+
+- `epoll_create`: 创建一个epoll文件描述符并返回，失败则返回-1
+- `epoll_ctl`: tell the kernel file descriptors you’re interested in updates about. Interestingly, you can give it lots of different kinds of file descriptors (pipes, FIFOs, sockets, POSIX message queues, inotify instances, devices, & more), but **NOT regular files**. 
+- `epoll_wait`: wait for updates about the list of files you’re interested in.
 
 ### Error Handling
 
@@ -138,4 +157,8 @@ void errif(bool condition, const char *errmsg){
     }
 }
 ```
+
+
+
+### QUIC
 

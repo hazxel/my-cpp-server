@@ -1,43 +1,43 @@
-BUILD_DIR = ./build
-BINARY_DIR = ./bin
-SOURCE_DIR = ./src
+BUILD_DIR = build
+DPT_DIR = build/.dpt
+BINARY_DIR = bin
+SOURCE_DIR = src
 
 CPP_SRC_FILES = $(shell find $(SOURCE_DIR) -name "*.cpp")
-CPP_OBJ_FILES = $(patsubst %.cpp, %.o, $(shell basename $(CPP_SRC_FILES)))
-CPP_DPT_FILES = $(patsubst %.cpp, %.d, $(shell basename $(CPP_SRC_FILES)))
+CPP_OBJ_FILES = $(patsubst $(SOURCE_DIR)%, $(BUILD_DIR)%, $(patsubst %.cpp, %.o, $(CPP_SRC_FILES)))
+CPP_DPT_FILES = $(patsubst $(SOURCE_DIR)%, $(DPT_DIR)%, $(patsubst %.cpp, %.d, $(CPP_SRC_FILES)))
 
+# put targets at the root of folder src!
 TARGET = client server
-TARGET_SRC_FILES = $(patsubst %, $(SOURCE_DIR)/%.cpp, $(TARGET))
-TARGET_OBJ_FILES = $(patsubst %, %.o, $(TARGET))
-
-SUPPORT_SRC_FILES = $(filter-out $(TARGET_SRC_FILES), $(CPP_SRC_FILES))
+TARGET_OBJ_FILES = $(patsubst %, $(BUILD_DIR)/%.o, $(TARGET))
 SUPPORT_OBJ_FILES = $(filter-out $(TARGET_OBJ_FILES), $(CPP_OBJ_FILES))
 
-CC = g++
+CC = clang++
 CC_FLAGS = -std=c++17
 LDFLAGS =
 
 
 all: $(TARGET) 
 
-$(TARGET): %: %.o $(SUPPORT_OBJ_FILES)
-	$(CC) $(addprefix $(BUILD_DIR)/, $(SUPPORT_OBJ_FILES)) $(BUILD_DIR)/$< -o $(BINARY_DIR)/$@ $(LDFLAGS)
+$(TARGET): %:$(filter %, $(TARGET_OBJ_FILES)) $(SUPPORT_OBJ_FILES)
+	mkdir -p $(BINARY_DIR) 
+	$(CC) $(SUPPORT_OBJ_FILES) $< -o $(BINARY_DIR)/$@ $(LDFLAGS)
 
-%.o: $(SOURCE_DIR)/%.cpp
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp
 	mkdir -p $(dir $@)
-	$(CC) $(CC_FLAGS) -c $< -o $(BUILD_DIR)/$@
+	$(CC) $(CC_FLAGS) -c $< -o $@
 
-%.d: %.cpp
-	@set -e; \
+$(DPT_DIR)/%.d: $(SOURCE_DIR)/%.cpp 
+	mkdir -p $(dir $@); \
+	set -e; \
 	rm -f $@; \
 	$(CC) -MM $(CC_FLAGS) $< > $@.$$$$.dtmp; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$.dtmp > $@; \
+	sed 's,\($(notdir $*)\)\.o[ :]*,$(patsubst $(DPT_DIR)%,$(BUILD_DIR)%,$(patsubst %.d, %.o, $@)) $@ :,g' < $@.$$$$.dtmp > $@; \
 	rm -f $@.$$$$.dtmp
 
 -include $(CPP_DPT_FILES)
 
 .PHONY: clean
 clean:
-	rm -f $(addprefix $(BUILD_DIR)/, $(CPP_OBJ_FILES))
-	rm -f $(addprefix $(BUILD_DIR)/, $(CPP_DPT_FILES))
-	rm -f $(addprefix $(BINARY_DIR)/, $(TARGET))
+	rm -rf $(BUILD_DIR)
+	rm -rf $(BINARY_DIR)

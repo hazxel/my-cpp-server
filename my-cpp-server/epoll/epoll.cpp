@@ -3,14 +3,14 @@
 #include <cstring>
 #include <vector>
 
-#include "epoll.hpp"
-#include "error.hpp"
-#include "constants.hpp"
+#include "my-cpp-server/epoll/epoll.hpp"
+#include "my-cpp-server/utility/error.hpp"
+#include "my-cpp-server/utility/constants.hpp"
 
 using std::vector;
 using namespace constants;
 
-Epoll::Epoll() {
+Epoll::Epoll() : epollfd_(-1) {
     epollfd_ = epoll_create(1024);
     errif(epollfd_ == -1, MSG_EPOLL_CREATE_ERR);
 }
@@ -18,6 +18,7 @@ Epoll::Epoll() {
 Epoll::~Epoll() {
     if (epollfd_ != -1) {
         close(epollfd_);
+        epollfd_ = -1;
     }
 }
 

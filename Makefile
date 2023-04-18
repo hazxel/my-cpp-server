@@ -2,7 +2,8 @@ BLD_DIR = build
 DPT_DIR = build/.dpt
 BIN_DIR = bin
 DBG_DIR = dbg
-SRC_DIR = src
+SRC_DIR = my-cpp-server
+INCLUDE_DIR = include
 
 CPP_SRC_FILES = $(shell find $(SRC_DIR) -name "*.cpp")
 CPP_OBJ_FILES = $(patsubst $(SRC_DIR)%, $(BLD_DIR)%, $(patsubst %.cpp, %.o, $(CPP_SRC_FILES)))
@@ -16,7 +17,7 @@ TARGET_OBJ_FILES = $(patsubst %, $(BLD_DIR)/%.o, $(TARGETS))
 SUPPORT_OBJ_FILES = $(filter-out $(TARGET_OBJ_FILES), $(CPP_OBJ_FILES))
 
 CC = g++
-CC_FLAGS = -std=c++17
+CC_FLAGS = -std=c++17 -I$(INCLUDE_DIR)
 LDFLAGS =
 
 

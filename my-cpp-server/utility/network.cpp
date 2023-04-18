@@ -6,9 +6,9 @@
 #include <iostream>
 
 
-#include "error.hpp"
-#include "network.hpp"
-#include "constants.hpp"
+#include "my-cpp-server/utility/error.hpp"
+#include "my-cpp-server/utility/network.hpp"
+#include "my-cpp-server/utility/constants.hpp"
 
 
 using std::cout;
@@ -31,7 +31,7 @@ void construct_sockaddr_in(struct sockaddr_in& addr, const char* ip, int port) {
     addr.sin_port = htons(port);
 }
 
-Socket::Socket() {
+Socket::Socket() : sockfd_(-1) {
     sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
     errif(sockfd_ == -1, MSG_SOCKET_CREATE_ERR);
     cout << "socket created! fd: " << sockfd_ << endl;
@@ -40,6 +40,7 @@ Socket::Socket() {
 Socket::~Socket() {
     if (sockfd_ != -1) {
         close(sockfd_);
+        sockfd_ = -1;
     }
 }
 

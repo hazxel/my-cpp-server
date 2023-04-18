@@ -5,10 +5,10 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "utility/error.hpp"
-#include "utility/network.hpp"
-#include "utility/epoll.hpp"
-#include "utility/constants.hpp"
+#include "my-cpp-server/utility/error.hpp"
+#include "my-cpp-server/utility/network.hpp"
+#include "my-cpp-server/epoll/epoll.hpp"
+#include "my-cpp-server/utility/constants.hpp"
 
 using namespace constants;
 using std::vector;

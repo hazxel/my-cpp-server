@@ -1,25 +1,34 @@
-CC = g++
-CC_FLAGS = -std=c++17
+BUILD_DIR = ./build
+BINARY_DIR = ./bin
+SOURCE_DIR = ./src
 
-CPP_SRC_FILES = $(shell find ./ -name "*.cpp")
-CPP_OBJ_FILES = $(patsubst %.cpp, %.o, $(CPP_SRC_FILES))
-CPP_DPT_FILES = $(patsubst %.cpp, %.d, $(CPP_SRC_FILES))
+CPP_SRC_FILES = $(shell find $(SOURCE_DIR) -name "*.cpp")
+CPP_OBJ_FILES = $(patsubst %.cpp, %.o, $(shell basename $(CPP_SRC_FILES)))
+CPP_DPT_FILES = $(patsubst %.cpp, %.d, $(shell basename $(CPP_SRC_FILES)))
 
 TARGET = client server
-TARGET_SRC_FILES = $(patsubst %, .//%.cpp, $(TARGET))
-TARGET_OBJ_FILES = $(patsubst %, .//%.o, $(TARGET))
+TARGET_SRC_FILES = $(patsubst %, $(SOURCE_DIR)/%.cpp, $(TARGET))
+TARGET_OBJ_FILES = $(patsubst %, %.o, $(TARGET))
 
 SUPPORT_SRC_FILES = $(filter-out $(TARGET_SRC_FILES), $(CPP_SRC_FILES))
 SUPPORT_OBJ_FILES = $(filter-out $(TARGET_OBJ_FILES), $(CPP_OBJ_FILES))
 
+# INC_DIRS = $(shell find $(SOURCE_DIR) -type d)
+# INC_FLAGS = $(addprefix -I,$(INC_DIRS))
 
-all: $(TARGET)
+CC = g++
+CC_FLAGS = -std=c++17
+LDFLAGS =
+
+
+all: $(TARGET) # $(addprefix $(BUILD_DIR)/, $(TARGET))
 
 $(TARGET): %: %.o $(SUPPORT_OBJ_FILES)
-	$(CC) $(SUPPORT_OBJ_FILES) $< -o $@ 
+	$(CC) $(addprefix $(BUILD_DIR)/, $(SUPPORT_OBJ_FILES)) $(BUILD_DIR)/$< -o $(BINARY_DIR)/$@ $(LDFLAGS)
 
-%.o: %.cpp
-	$(CC) $(CC_FLAGS) -c $< -o $@
+%.o: $(SOURCE_DIR)/%.cpp
+	mkdir -p $(dir $@)
+	$(CC) $(CC_FLAGS) -c $< -o $(BUILD_DIR)/$@
 
 %.d: %.cpp
 	@set -e; \
@@ -30,12 +39,16 @@ $(TARGET): %: %.o $(SUPPORT_OBJ_FILES)
 
 -include $(CPP_DPT_FILES)
 
+help:
+	@echo $(TARGET_SRC_FILES)
+	@echo $(TARGET_OBJ_FILES)
+	@echo $(addprefix $(BUILD_DIR)/, $(TARGET))
+	@echo $(shell basename $(CPP_SRC_FILES))
+	@echo $(CPP_OBJ_FILES)
+	@echo $(SUPPORT_OBJ_FILES)
+
 .PHONY: clean
 clean:
-	rm -f $(DST)
-	rm -f $(CPP_OBJ_FILES)
-	rm -f $(CPP_DPT_FILES)
-	rm -f $(shell find ./ -name "*.dtmp")
-
-run:
-	make all
+	rm -f $(addprefix $(BUILD_DIR)/, $(CPP_OBJ_FILES))
+	rm -f $(addprefix $(BUILD_DIR)/, $(CPP_DPT_FILES))
+	rm -f $(addprefix $(BINARY_DIR)/, $(TARGET))

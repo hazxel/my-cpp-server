@@ -32,7 +32,7 @@ $(DPT_DIR)/%.d: $(SOURCE_DIR)/%.cpp
 	set -e; \
 	rm -f $@; \
 	$(CC) -MM $(CC_FLAGS) $< > $@.$$$$.dtmp; \
-	sed 's,\($(notdir $*)\)\.o[ :]*,$(patsubst $(DPT_DIR)%,$(BUILD_DIR)%,$(patsubst %.d, %.o, $@)) $@ :,g' < $@.$$$$.dtmp > $@; \
+	sed 's,\($(notdir $*)\)\.o[ :]*,$(patsubst $(DPT_DIR)%.d,$(BUILD_DIR)%.o,$@) $@ : ,g' < $@.$$$$.dtmp > $@; \
 	rm -f $@.$$$$.dtmp
 
 -include $(CPP_DPT_FILES)

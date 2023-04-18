@@ -10,12 +10,9 @@
 using namespace constants;
 
 int main() {
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    errif(sockfd == -1, MSG_SOCKET_CREATE_ERR);
-
-    struct sockaddr_in serv_addr;
-    construct_sockaddr_in(serv_addr, DEFAULT_SERVER_IP, DEFAULT_SERVER_PORT);
-    connect(sockfd, (sockaddr*) &serv_addr, sizeof(serv_addr));
+    Socket client_socket;
+    client_socket.connect(DEFAULT_SERVER_IP, DEFAULT_SERVER_PORT);
+    int sockfd = client_socket.get_fd();
 
     while(true){
         char buf[BUFFER_SIZE];
@@ -29,10 +26,9 @@ int main() {
         if (read_bytes > 0){
             std::cout << "message from server: " << buf << std::endl;
         } else if (read_bytes == 0) {
-            std::cout << MSG_SOCKET_DISCONNECTED << std::endl;
+            std::cout << MSG_SERVER_SOCKET_DISCONNECTED << std::endl;
             break;
         } else if (read_bytes == -1) {
-            close(sockfd);
             errif(true, MSG_SOCKET_READ_ERR);
         }
     }

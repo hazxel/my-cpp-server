@@ -3,4 +3,4 @@
 
 void errif(bool, const char*);
 
-#endif
+#endif // MY_SERVER_ERROR_HPP

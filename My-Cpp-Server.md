@@ -43,6 +43,8 @@ Upon successful completion, returns 0, otherwise -1 is returned and *errno* is s
 
 > `sockaddr_in` vs `sockaddr`: struct `sockaddr` is a general structure valid for any protocol. `sockaddr_in` is specific for IPv4 address family.
 
+> Usually, only server side need to bind a port because: bind可以提前确定端口号，如浏览网页服务的80端口，用于FTP服务的21端口等，client基本没这个需求
+
 
 
 ##### listen - wait for socket connections and limit the queue of incoming connections
@@ -118,6 +120,13 @@ Upon successful completion, returns the nonnegative file descriptor of the accep
 > `read`/`write` are for TCP, for UDP, use `sendto`/`recvfrom`
 
 > Linux系统的文件描述符理论上是有限的，在使用完一个fd之后，需要使用头文件`<unistd.h>`中的`close`函数关闭。更多内核相关知识可以参考Robert Love《Linux内核设计与实现》的第三版。
+
+
+
+##### block vs non-block
+
+- Block: block until data arrive. 
+- Non-block: returns immediately. if no data, write EWOULDBLOCK or EAGAIN to `errno`
 
 
 

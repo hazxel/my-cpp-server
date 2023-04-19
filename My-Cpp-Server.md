@@ -215,5 +215,11 @@ void errif(bool condition, const char *errmsg){
 
 
 
+### Thread Pool
+
+在线程池析构时，需要注意将已经添加的所有任务执行完，最好不采用外部的暴力kill、而是让每个线程从内部自动退出，具体实现为添加一个 flag 标识任务终止，并将其加入 condition variable 唤醒条件，析构时将flag置为终止后 notify 所有线程，即可使每个线程自动退出。
+
+
+
 ### QUIC
 

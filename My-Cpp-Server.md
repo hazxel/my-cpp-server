@@ -130,7 +130,12 @@ Upon successful completion, returns the nonnegative file descriptor of the accep
 
 
 
-### epoll
+
+
+
+### epoll -  \<sys/epoll.h\>
+
+> not available on MacOS
 
 ##### select & poll
 
@@ -161,6 +166,26 @@ epoll模型修改主动轮询为被动通知，当有事件发生时，被动接
 - `epoll_wait`: wait for updates about the list of files you’re interested in.
 
 
+##### epoll event
+
+`epoll_event` struct has a union type member, `data`. This could be used to store a pointer to user defined structure.
+
+```c++
+typedef union epoll_data {
+  void *ptr;
+  int fd;
+  uint32_t u32;
+  uint64_t u64;
+} epoll_data_t;
+struct epoll_event {
+  uint32_t events;	/* Epoll events */
+  epoll_data_t data;	/* User data variable */
+} __EPOLL_PACKED;
+```
+
+
+
+
 
 ### Error Handling
 
@@ -175,6 +200,18 @@ void errif(bool condition, const char *errmsg){
     }
 }
 ```
+
+
+
+
+
+### Event Driven
+
+- Reactor 是非阻塞同步网络模式，感知的是就绪可读写事件。在每次感知到有事件发生（比如可读就绪事件）后，就需要应用进程主动调用 read 方法来完成数据的读取，也就是要应用进程主动将 socket 接收缓存中的数据读到应用进程内存中，这个过程是同步的，读取完数据后应用进程才能处理数据。
+
+- Proactor 是异步网络模式， 感知的是已完成的读写事件。在发起异步读写请求时，需要传入数据缓冲区的地址（用来存放结果数据）等信息，这样系统内核才可以自动帮我们把数据的读写工作完成，这里的读写工作全程由操作系统来做，并不需要像 Reactor 那样还需要应用进程主动发起 read/write 来读写数据，操作系统完成读写工作后，就会通知应用进程直接处理数据。
+
+  可惜的是，在 Linux 下的异步 I/O 是不完善的， `aio` 系列函数是由 POSIX 定义的异步操作接口，不是真正的操作系统级别支持的，而是在用户空间模拟出来的异步，并且仅仅支持基于本地文件的 aio 异步操作，[网络编程](https://www.zhihu.com/search?q=%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A1856426252%7D)中的 socket 是不支持的，这也使得基于 Linux 的高性能[网络程序](https://www.zhihu.com/search?q=%E7%BD%91%E7%BB%9C%E7%A8%8B%E5%BA%8F&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A1856426252%7D)都是使用 Reactor 方案。
 
 
 

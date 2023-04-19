@@ -1,54 +1,38 @@
-#include <sys/epoll.h>
-#include <arpa/inet.h>
+#include <unistd.h>
 #include <cstring>
 #include <iostream>
-#include <unistd.h>
-#include <errno.h>
 
+#include "my-cpp-server/server/server.hpp"
 #include "my-cpp-server/utility/error.hpp"
 #include "my-cpp-server/utility/network.hpp"
-#include "my-cpp-server/epoll/epoll.hpp"
 #include "my-cpp-server/utility/constants.hpp"
+#include "my-cpp-server/event/eventpoller.hpp"
+#include "my-cpp-server/event/eventlooper.hpp"
 
-using namespace constants;
-using std::vector;
+
 using std::cout;
 using std::endl;
+using namespace constants;
 
-void handle_new_client(Epoll&, Socket&);
-void handle_client_msg_et(int fd);
-void handle_client_msg_lt(int fd);
-
-int main() {
-    Socket server_socket;
-    int sockfd = server_socket.get_fd();
-    server_socket.bind(DEFAULT_SERVER_IP, DEFAULT_SERVER_PORT);
-    server_socket.listen(SOMAXCONN);
-    server_socket.set_nonblock(); // non-blocking mode because we use epoll at ET mode
+Server::Server() : server_socket_(Socket()), event_poller_(EventPoller()), event_looper_(EventLooper(event_poller_)) {
+    int sockfd = server_socket_.get_fd();
+    server_socket_.bind(DEFAULT_SERVER_IP, DEFAULT_SERVER_PORT);
+    server_socket_.listen(SOMAXCONN);
+    server_socket_.set_nonblock(); // non-blocking mode because we use epoll at ET mode
     
-    Epoll epoll;
-    epoll.add_fd(sockfd, EPOLLIN);
-
-    while (true) {
-        vector<epoll_event> client_evs = epoll.poll_block(MAX_EVENTS);
-        for (epoll_event ev : client_evs) {
-            if (ev.data.fd == sockfd) {
-                handle_new_client(epoll, server_socket);
-            } else if (ev.events & EPOLLIN) {
-                handle_client_msg_et(ev.data.fd);
-            }
-        }
-    }
-    return 0;
+    auto callback = std::bind(handle_new_client, &event_poller_, &server_socket_);
+    event_poller_.add_fd(sockfd, callback);
 }
 
-void handle_new_client(Epoll &epoll, Socket &server_socket) {
-    int clnt_sockfd = server_socket.accept();
+
+void Server::handle_new_client(EventPoller *ep, Socket *server_socket) {
+    int clnt_sockfd = server_socket->accept();
     set_nonblock(clnt_sockfd);
-    epoll.add_fd(clnt_sockfd, EPOLLIN | EPOLLET); // ET mode
+    auto callback = std::bind(handle_client_msg_lt, clnt_sockfd);
+    ep->add_fd(clnt_sockfd, callback); // ET mode inside 
 }
 
-void handle_client_msg_et(int fd) {
+void Server::handle_client_msg_et(int fd) {
     char buf[BUFFER_SIZE];
     while (true) {
         memset(buf, 0, BUFFER_SIZE);
@@ -73,7 +57,7 @@ void handle_client_msg_et(int fd) {
     }
 }
 
-void handle_client_msg_lt(int fd) {
+void Server::handle_client_msg_lt(int fd) {
     char buf[BUFFER_SIZE];
     memset(buf, 0, BUFFER_SIZE);
     ssize_t read_bytes = read(fd, buf, sizeof(buf));

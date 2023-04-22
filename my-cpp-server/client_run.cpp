@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "my-cpp-server/utility/error.hpp"
-#include "my-cpp-server/utility/network.hpp"
+#include "my-cpp-server/network/socket.hpp"
 #include "my-cpp-server/utility/constants.hpp"
 
 using namespace constants;

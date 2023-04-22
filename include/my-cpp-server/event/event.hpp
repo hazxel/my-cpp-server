@@ -29,7 +29,6 @@ public:
     inline std::function<void()> get_callback() const { return callback_; }
     inline uint32_t get_epctl_flag() const { return static_cast<uint32_t>(ev_type_) | static_cast<uint32_t>(ev_trigger_mode_); }
     inline void set_epoll_event(uint32_t ev) { epoll_events_ = ev; }
-    inline void handle() { callback_(); }
 
 private:
     // EventPoller *ptr_ep_;

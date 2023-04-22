@@ -14,6 +14,7 @@ void EventLooper::loop() {
     while (true) {
         std::vector<Event*> client_evs = event_poller_.poll_block(MAX_EVENTS);
         for (Event* ptr_ev : client_evs) {
+            // if (ptr_ev->get_ev() & EPOLLIN)
             thread_pool_.add_task(ptr_ev->get_callback());
         }
     }

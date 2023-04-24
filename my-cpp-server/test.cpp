@@ -26,7 +26,6 @@ void connectServer(int msg_num, int wait_time) {
 
     sleep(wait_time);
 
-
     for (int i = 0; i < msg_num; i++) {
         errif(write(sockfd, send_buf, sizeof(send_buf)) == -1, MSG_SOCKET_WRITE_ERR);   
         memset(read_buf, 0, sizeof(read_buf));
@@ -41,6 +40,9 @@ void connectServer(int msg_num, int wait_time) {
             errif(true, MSG_SOCKET_READ_ERR);
         }
     }
+
+    // if client disconnects immediately, server may not be able to read the msg
+    sleep(wait_time);
 }
 
 int main(int argc, char *argv[]) {

@@ -16,8 +16,19 @@ TARGET_DBG_FILES = $(addprefix $(DBG_DIR)/, $(TARGETS))
 TARGET_OBJ_FILES = $(patsubst %, $(BLD_DIR)/%.o, $(TARGETS))
 SUPPORT_OBJ_FILES = $(filter-out $(TARGET_OBJ_FILES), $(CPP_OBJ_FILES))
 
+ARCH = $(shell uname -s)
+DARWIN = "Darwin"
+LINUX = "Linux"
+DEFS = 
+ifeq ($(ARCH), Darwin)
+	DEFS += -DMY_CPP_SERVER_PLATFORM_DARWIN
+endif
+ifeq ($(ARCH), Linux)
+	DEFS += -DMY_CPP_SERVER_PLATFORM_LINUX
+endif
+
 CC = g++
-CC_FLAGS = -std=c++17 -I$(INCLUDE_DIR)
+CC_FLAGS = -std=c++17 -I$(INCLUDE_DIR) $(DEFS)
 LDFLAGS =
 
 

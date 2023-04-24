@@ -1,6 +1,4 @@
-#include <sys/epoll.h>
 #include <unistd.h>
-#include <cstring>
 #include <vector>
 #include <memory>
 #include <functional>
@@ -13,20 +11,26 @@
 using std::vector;
 using namespace constants;
 
-EventPoller::EventPoller() : epollfd_(-1) {
-    epollfd_ = epoll_create(1024);
-    errif(epollfd_ == -1, MSG_EPOLL_CREATE_ERR);
+#ifdef MY_CPP_SERVER_PLATFORM_LINUX
+
+#include <sys/epoll.h>
+#include <cstring>
+
+
+EventPoller::EventPoller() : fd_(-1) {
+    fd_ = epoll_create(1024);
+    errif(fd_ == -1, MSG_EPOLL_CREATE_ERR);
 }
 
 EventPoller::~EventPoller() {
-    if (epollfd_ != -1) {
-        close(epollfd_);
-        epollfd_ = -1;
+    if (fd_ != -1) {
+        close(fd_);
+        fd_ = -1;
     }
 }
 
-void EventPoller::add_fd(int fd, const std::function<void()> &callback, bool involve_threadpool, EventTriggerMode mode) {
-    auto p_event = std::make_unique<Event>(fd, EventType::READ, mode, involve_threadpool, callback);
+void EventPoller::add_fd(int fd, EventType type, EventTriggerMode mode, const std::function<void()> &callback, bool involve_threadpool) {
+    auto p_event = std::make_unique<Event>(fd, type, mode, involve_threadpool, callback);
 
     epoll_event ev;
     memset(&ev, 0, sizeof(ev));
@@ -34,12 +38,12 @@ void EventPoller::add_fd(int fd, const std::function<void()> &callback, bool inv
     ev.data.ptr = p_event.get();
 
     events_.push_back(std::move(p_event));
-    errif(epoll_ctl(epollfd_, EPOLL_CTL_ADD, fd, &ev) == -1, MSG_EPOLL_CTL_ADD_ERR);
+    errif(epoll_ctl(fd_, EPOLL_CTL_ADD, fd, &ev) == -1, MSG_EPOLL_CTL_ADD_ERR);
 }
 
 vector<Event*> EventPoller::poll(int max_events, int timeout) {
     epoll_event evs[max_events];
-    int active_ev_num = epoll_wait(epollfd_, evs, max_events, timeout);
+    int active_ev_num = epoll_wait(fd_, evs, max_events, timeout);
     errif(active_ev_num < 0, MSG_EPOLL_WAIT_ERR);
 
     vector<Event*> active_evs(active_ev_num);
@@ -49,3 +53,50 @@ vector<Event*> EventPoller::poll(int max_events, int timeout) {
     }
     return active_evs;
 }
+
+#endif // MY_CPP_SERVER_PLATFORM_LINUX
+
+
+#ifdef MY_CPP_SERVER_PLATFORM_DARWIN
+
+#include <sys/event.h>
+
+
+EventPoller::EventPoller() : fd_(-1) {
+    fd_ = kqueue();
+    errif(fd_ == -1, MSG_KQUEUE_CREATE_ERR);
+}
+
+EventPoller::~EventPoller() {
+    if (fd_ != -1) {
+        close(fd_);
+        fd_ = -1;
+    }
+}
+
+void EventPoller::add_fd(int fd, EventType type, EventTriggerMode mode, const std::function<void()> &callback, bool involve_threadpool) {
+    auto p_event = std::make_unique<Event>(fd, type, mode, involve_threadpool, callback);
+
+    struct kevent ev;
+    EV_SET(&ev, fd, p_event->get_filter_flag(), EV_ADD | p_event->get_trigger_flag(), 0, 0, p_event.get());
+
+    events_.push_back(std::move(p_event));
+    errif(kevent(fd_, &ev, 1, NULL, 0, NULL) == -1, MSG_KQUEUE_REGISTER_ERR);
+}
+
+vector<Event*> EventPoller::poll(int max_events, int timeout) {
+    struct kevent evs[max_events];
+    struct timespec ts;
+    ts.tv_sec = timeout / 1000;
+    ts.tv_nsec = (timeout % 1000) * 1000000;
+    int active_ev_num = kevent(fd_, NULL, 0, evs, max_events, timeout == -1 ? NULL : &ts);
+    errif(active_ev_num < 0, MSG_KQUEUE_POLL_ERR);
+
+    vector<Event*> active_evs(active_ev_num);
+    for (int i = 0; i < active_ev_num; ++i) {
+        active_evs[i] = static_cast<Event*>(evs[i].udata);
+    }
+    return active_evs;
+}
+
+#endif // MY_CPP_SERVER_PLATFORM_DARWIN

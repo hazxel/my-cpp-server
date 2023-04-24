@@ -18,9 +18,13 @@ namespace constants {
     inline const char MSG_SOCKET_WRITE_ERR[] = "socket write error, connection may be closed.";
     inline const char MSG_SERVER_SOCKET_DISCONNECTED[] = "server socket disconnected.";
 
+    inline const char MSG_INVALID_EVENT_TYPE[] = "invalid event type.";
     inline const char MSG_EPOLL_CREATE_ERR[] = "epoll create error.";
     inline const char MSG_EPOLL_CTL_ADD_ERR[] = "epoll ctl add error.";
     inline const char MSG_EPOLL_WAIT_ERR[] = "epoll wait error.";
+    inline const char MSG_KQUEUE_CREATE_ERR[] = "kqueue create error.";
+    inline const char MSG_KQUEUE_REGISTER_ERR[] = "kqueue register error.";
+    inline const char MSG_KQUEUE_POLL_ERR[] = "kqueue poll error.";
 }
 
 #endif // MY_SERVER_CONSTANTS_HPP

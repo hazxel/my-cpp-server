@@ -1,5 +1,6 @@
-#include <mutex>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <vector>
 #include <queue>
 #include <functional>
@@ -35,6 +36,8 @@ ThreadPool::~ThreadPool() {
     for (auto &thread : threads_) {
         if (thread.joinable()) {
             thread.join();
+        } else {
+            thread.detach();
         }
     }
 }

@@ -25,8 +25,8 @@ EventPoller::~EventPoller() {
     }
 }
 
-void EventPoller::add_fd(int fd, const std::function<void()> &callback) {
-    auto p_event = std::make_unique<Event>(fd, EventType::READ, EventTriggerMode::EDGE, callback);
+void EventPoller::add_fd(int fd, const std::function<void()> &callback, bool involve_threadpool, EventTriggerMode mode) {
+    auto p_event = std::make_unique<Event>(fd, EventType::READ, mode, involve_threadpool, callback);
 
     epoll_event ev;
     memset(&ev, 0, sizeof(ev));

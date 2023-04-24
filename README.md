@@ -13,3 +13,10 @@ my-cpp-server
 - server: server logics
 - threadpool: manage threads
 - utility: support error handling, logging, constants, etc.
+
+### Todo
+- add test
+- switch to cmake, use macro to support different OS
+- using kqueue on macOS
+- implement UDP
+- implement QUIC

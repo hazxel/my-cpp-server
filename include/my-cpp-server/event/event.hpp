@@ -21,7 +21,7 @@ enum class EventTriggerMode : uint32_t {
 
 class Event {
 public:
-    Event(int fd, EventType ev_type, EventTriggerMode ev_trigger_mode, std::function<void()> callback);
+    Event(int fd, EventType ev_type, EventTriggerMode ev_trigger_mode, bool involve_thread_pool, std::function<void()> callback);
     // ~Event();
 
     inline int get_fd() const { return fd_; }
@@ -29,13 +29,14 @@ public:
     inline std::function<void()> get_callback() const { return callback_; }
     inline uint32_t get_epctl_flag() const { return static_cast<uint32_t>(ev_type_) | static_cast<uint32_t>(ev_trigger_mode_); }
     inline void set_epoll_event(uint32_t ev) { epoll_events_ = ev; }
+    inline bool involve_thread_pool() const { return involve_thread_pool_; }
 
 private:
-    // EventPoller *ptr_ep_;
     int fd_;
     EventType ev_type_;
     EventTriggerMode ev_trigger_mode_;
     uint32_t epoll_events_;
+    bool involve_thread_pool_;
     std::function<void()> callback_;
 };
 

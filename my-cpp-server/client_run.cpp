@@ -14,7 +14,7 @@ int main() {
     client_socket.connect(DEFAULT_SERVER_IP, DEFAULT_SERVER_PORT);
     int sockfd = client_socket.get_fd();
 
-    while(true){
+    while(true) {
         char buf[BUFFER_SIZE];
         memset(buf, 0, sizeof(buf));
         std::cin >> buf;

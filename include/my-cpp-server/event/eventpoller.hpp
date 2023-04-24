@@ -13,7 +13,7 @@ public:
     EventPoller();
     ~EventPoller();
 
-    void add_fd(int fd, const std::function<void()> &callback);
+    void add_fd(int fd, const std::function<void()> &callback, bool use_threadpool, EventTriggerMode mode);
     std::vector<Event*> poll(int max_events, int timeout);
     inline std::vector<Event*> poll_block(int max_events) { return poll(max_events, -1); }
     inline std::vector<Event*> poll_nonblock(int max_events) { return poll(max_events, 0); }

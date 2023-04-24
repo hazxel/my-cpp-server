@@ -10,7 +10,7 @@ CPP_OBJ_FILES = $(patsubst $(SRC_DIR)%, $(BLD_DIR)%, $(patsubst %.cpp, %.o, $(CP
 CPP_DPT_FILES = $(patsubst $(SRC_DIR)%, $(DPT_DIR)%, $(patsubst %.cpp, %.d, $(CPP_SRC_FILES)))
 
 # put targets at the root of folder src!
-TARGETS = client_run server_run
+TARGETS = client_run server_run test
 TARGET_BIN_FILES = $(addprefix $(BIN_DIR)/, $(TARGETS))
 TARGET_DBG_FILES = $(addprefix $(DBG_DIR)/, $(TARGETS))
 TARGET_OBJ_FILES = $(patsubst %, $(BLD_DIR)/%.o, $(TARGETS))

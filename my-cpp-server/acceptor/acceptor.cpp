@@ -11,6 +11,6 @@ void Acceptor::accept() {
     int clnt_sockfd = server_connection_.accept();
     set_nonblock(clnt_sockfd);
     auto callback = std::bind(handle_client_msg_et, clnt_sockfd);
-    event_poller_.add_fd(clnt_sockfd, callback); // ET mode inside 
+    event_poller_.add_fd(clnt_sockfd, callback, true, EventTriggerMode::EDGE); // register as ET mode, handled by thread pool 
 }
 

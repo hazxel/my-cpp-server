@@ -11,7 +11,7 @@ using namespace constants;
 
 Server::Server() : pConnection_(new SocketConnection()), thread_pool_(), event_poller_(), event_looper_(event_poller_, thread_pool_), acceptor_(*pConnection_, event_poller_) {
     auto acceptor_callback = [&acceptor = acceptor_]() {acceptor.accept();};
-    event_poller_.add_fd(pConnection_->get_fd(), acceptor_callback);
+    event_poller_.add_fd(pConnection_->get_fd(), acceptor_callback, false, EventTriggerMode::LEVEL);
 }
 
 Server::~Server() {

@@ -1,10 +1,8 @@
 # my-cpp-server
 
-
-
 ### Project Structure
 
-my-cpp-server
+##### my-cpp-server
 
 - acceptor: used to accept connection
 - connection: support network connection, hide low-level protocal (TCP, UDP, QUIC, ...)
@@ -14,8 +12,12 @@ my-cpp-server
 - threadpool: manage threads
 - utility: support error handling, logging, constants, etc.
 
+##### executables
+
+- server_run: start a server at default address 127.0.0.1 and default port 8080
+- client_run: start a client and connect to the server
+- test: start many clients to test the server
 ### Todo
-- add test
 - switch to cmake, use macro to support different OS
 - using kqueue on macOS
 - implement UDP

@@ -1,5 +1,7 @@
 # My Cpp Server
 
+> This is a learning note during the process of building this server.
+
 ### Socket - \<sys/socket.h\>
 
 ##### socket - create an endpoint for communication 
@@ -135,7 +137,7 @@ Upon successful completion, returns the nonnegative file descriptor of the accep
 
 ### epoll -  \<sys/epoll.h\>
 
-> not available on MacOS
+> only available on Linux, not available on MacOS
 
 ##### select & poll
 
@@ -150,7 +152,7 @@ epoll模型修改主动轮询为被动通知，当有事件发生时，被动接
 - level-triggered (LT): keep nagging you as long as the interested file descriptors are ready. Every event is guaranteed to be handled, but will have a side effect on performance.
 
 
-- edge-triggered (ET): get notifications **once** a file descriptor becomes readable. Will be more concurrency friendly, but will be more difficult to program. 注意ET模式必须搭配非阻塞式socket使用，触发可读事件以后，一定要一次性把 socket 上的数据收取干净才行，也就是说一定要循环调用 recv 函数直到 recv 出错，错误码是EWOULDBLOCK（EAGAIN 一样）（此时表示 socket 上本次数据已经读完），所以接受连接最好不要用ET模式
+- edge-triggered (ET): get notifications **once** a file descriptor becomes readable. Will be more concurrency friendly, but will be more difficult to program. 注意ET模式必须搭配非阻塞式socket使用，触发可读事件以后，一定要一次性把 socket 上的数据收取干净才行，也就是说一定要循环调用 recv 函数直到 recv 出错，错误码是EWOULDBLOCK（EAGAIN 一样）（此时表示 socket 上本次数据已经读完），所以接受连接最好不要用ET模式。 而如果ET模式你的文件描述符如果不是非阻塞的，那这个一直读或一直写势必会在最后一次阻塞。这样就不能再阻塞在 epoll_wait 上了，造成其他文件描述符的任务饿死。
 
 ##### usage
 
@@ -185,6 +187,16 @@ struct epoll_event {
 
 
 
+### kqueue
+
+> available on most UNIX systems, works on MacOS
+
+Todo:
+
+in kqueue, read and write events are registered separately, and polled separately
+
+kqueue is default to LT mode and can be set to ET mode by adding flag EV_CLEAR
+
 
 
 ### Error Handling
@@ -212,6 +224,7 @@ void errif(bool condition, const char *errmsg){
 - Proactor 是异步网络模式， 感知的是已完成的读写事件。在发起异步读写请求时，需要传入数据缓冲区的地址（用来存放结果数据）等信息，这样系统内核才可以自动帮我们把数据的读写工作完成，这里的读写工作全程由操作系统来做，并不需要像 Reactor 那样还需要应用进程主动发起 read/write 来读写数据，操作系统完成读写工作后，就会通知应用进程直接处理数据。
 
   可惜的是，在 Linux 下的异步 I/O 是不完善的， `aio` 系列函数是由 POSIX 定义的异步操作接口，不是真正的操作系统级别支持的，而是在用户空间模拟出来的异步，并且仅仅支持基于本地文件的 aio 异步操作，[网络编程](https://www.zhihu.com/search?q=%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A1856426252%7D)中的 socket 是不支持的，这也使得基于 Linux 的高性能[网络程序](https://www.zhihu.com/search?q=%E7%BD%91%E7%BB%9C%E7%A8%8B%E5%BA%8F&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A1856426252%7D)都是使用 Reactor 方案。
+
 
 
 

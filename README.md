@@ -19,6 +19,10 @@
 - test: start many clients to test the server
 
 
+### Supported OS
+- Linux
+- MacOS
+
 ### Build
 run `make` to build the project
 

@@ -27,7 +27,7 @@ ifeq ($(ARCH), Linux)
 	DEFS += -DMY_CPP_SERVER_PLATFORM_LINUX
 endif
 
-CC = g++
+CC = g++-13
 CC_FLAGS = -std=c++17 -I$(INCLUDE_DIR) $(DEFS)
 LDFLAGS =
 
